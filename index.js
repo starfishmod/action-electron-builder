@@ -104,20 +104,13 @@ const runAction = () => {
 	setEnvVariable("ADBLOCK", true);
 
 	log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
-	run(useNpm ? "npm install" : "yarn");
+	run("yarn");
 
 	// Run NPM build script if it exists
 	log("Running the build script…");
-	if (useNpm) {
-		run("npm run build --if-present");
-	} else {
-		// TODO: Use `yarn run build --if-present` once supported
-		// (https://github.com/yarnpkg/yarn/issues/6894)
-		const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf8"));
-		if (packageJson.scripts && packageJson.scripts.build) {
-			run("yarn build");
-		}
-	}
+	const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf8"));
+	run("yarn build");
+
 
 	log(`${release ? "Releasing" : "Building"} the Electron app…`);
 	if(release){
