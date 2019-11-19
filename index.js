@@ -81,7 +81,7 @@ const setEnvVariable = (name, value) => {
 const runAction = () => {
 	const platform = getPlatform();
 	const release = getEnvVariable("release") === "true";
-	const GITHUB_REPOSITORY = getEnvVariable("github_repository",true);
+	const GITHUB_REPOSITORY = process.env['GITHUB_REPOSITORY'];
 	const ghtoken = getEnvVariable("github_token", true);
 
 	// Make sure `package.json` file exists
@@ -143,7 +143,7 @@ const runAction = () => {
 
 					const options = {
 							method: 'PUT',
-							url: 'https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/'+packageJson.version+'/assets',
+							url: 'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
 							qs: {name: filename}, // optional 
 							headers: {
 									'content-type': 'application/octet-stream',
