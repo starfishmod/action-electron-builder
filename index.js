@@ -135,7 +135,7 @@ const runAction = () => {
 				var fileSizeInBytes = stats["size"];
 					
 request.post({
-	url:'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version
+	url:'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases'
 	, form: {
 		tag_name:packageJson.version,
 		target_commitish: 'electron',
