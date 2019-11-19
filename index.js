@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
-var fs = require("fs");
+const fs = require('fs');
+const request = require('request-promise');
 
 
 
@@ -147,8 +148,7 @@ const runAction = () => {
 				
 				//https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}
 		
-					const fs = require('fs');
-					const request = require('request-promise');
+					
 
 					const options = {
 							method: 'PUT',
