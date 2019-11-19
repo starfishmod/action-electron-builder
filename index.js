@@ -5,15 +5,6 @@ const request = require('request-promise');
 
 
 
-req.on('error', function(e) {
-  console.log('problem with request: ' + e.message);
-});
-
-// write data to request body
-req.write('data\n');
-req.write('data\n');
-req.end();
-
 const NPM_LOCKFILE_PATH = "./package-lock.json";
 const PACKAGE_JSON_PATH = "./package.json";
 
