@@ -35,7 +35,7 @@ const useNpm = fs.existsSync(NPM_LOCKFILE_PATH);
  * Exits if the `package.json` file is missing
  */
 const verifyPackageJson = () => {
-	if (!existsSync(PACKAGE_JSON_PATH)) {
+	if (!fs.existsSync(PACKAGE_JSON_PATH)) {
 		exit("Missing `package.json` file");
 	}
 };
