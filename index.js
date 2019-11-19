@@ -81,7 +81,7 @@ const setEnvVariable = (name, value) => {
 const runAction = () => {
 	const platform = getPlatform();
 	const release = getEnvVariable("release") === "true";
-	const GITHUB_REPOSITORY = getEnvVariable("github_reposiorty",true);
+	const GITHUB_REPOSITORY = getEnvVariable("github_repository",true);
 	const ghtoken = getEnvVariable("github_token", true);
 
 	// Make sure `package.json` file exists
