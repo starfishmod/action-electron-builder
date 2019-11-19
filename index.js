@@ -1,4 +1,4 @@
-const { execSync } = require("child_process");
+const cp = require("child_process");
 const fs = require('fs');
 const request = require('request-promise');
 
@@ -24,12 +24,12 @@ const exit = msg => {
 /**
  * Executes the provided shell command and redirects stdout/stderr to the console
  */
-const run = cmd => fs.execSync(cmd, { encoding: "utf8", stdio: "inherit" });
+const run = cmd => cp.execSync(cmd, { encoding: "utf8", stdio: "inherit" });
 
 /**
  * Returns whether NPM should be used to run commands (instead of Yarn, which is the default)
  */
-const useNpm = existsSync(NPM_LOCKFILE_PATH);
+const useNpm = fs.existsSync(NPM_LOCKFILE_PATH);
 
 /**
  * Exits if the `package.json` file is missing
