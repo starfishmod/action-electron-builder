@@ -134,8 +134,21 @@ const runAction = () => {
 				var stats = fs.statSync(process.cwd()+'/dist/'+filename);
 				var fileSizeInBytes = stats["size"];
 					
-
-					const options = {
+request.post({
+	url:'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version
+	, form: {
+		tag_name:packageJson.version,
+		target_commitish: 'electron',
+		name: 'v'+packageJson.version,
+		body: 'New Release'
+	}
+	, headers: {'authorization': 'token '+ghtoken	}
+	
+}, function(err,httpResponse,body){
+	if(err){
+		log(err);
+	}
+	const options = {
 							method: 'PUT',
 							url: 'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
 							qs: {name: filename}, // optional 
@@ -152,6 +165,10 @@ const runAction = () => {
 					.catch(err => {
 							console.log(err);
 					});
+	
+
+});
+				
 				
 			}
 	});
