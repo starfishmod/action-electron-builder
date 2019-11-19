@@ -15,7 +15,9 @@
 		"format": "prettier --write",
 		"lint": "eslint --fix --max-warnings 0"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"request-promise":"*"
+	},
 	"peerDependencies": {},
 	"devDependencies": {
 		"@samuelmeuli/eslint-config": "^4.0.1",
