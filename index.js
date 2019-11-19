@@ -143,7 +143,7 @@ request.post({
 		body: 'New Release'
 	}
 	, json: true
-	, headers: {'authorization': 'token '+ghtoken	}
+	, headers: {'authorization': 'token '+ghtoken,'user-agent':"starfishmod-action-electron-header"	}
 	
 }, function(err,httpResponse,body){
 	if(err){
@@ -157,6 +157,7 @@ request.post({
 									'content-type': 'application/octet-stream',
 									'authorization': 'token '+ghtoken,
 									'content-length':fileSizeInBytes
+								,'user-agent':"starfishmod-action-electron-header"
 							}
 					};
 
