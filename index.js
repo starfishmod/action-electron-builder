@@ -24,7 +24,7 @@ const exit = msg => {
 /**
  * Executes the provided shell command and redirects stdout/stderr to the console
  */
-const run = cmd => execSync(cmd, { encoding: "utf8", stdio: "inherit" });
+const run = cmd => fs.execSync(cmd, { encoding: "utf8", stdio: "inherit" });
 
 /**
  * Returns whether NPM should be used to run commands (instead of Yarn, which is the default)
