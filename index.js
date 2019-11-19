@@ -134,8 +134,17 @@ const runAction = () => {
 				//https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}
 				var stats = fs.statSync(process.cwd()+'/dist/'+filename);
 				var fileSizeInBytes = stats["size"];
-				log("Creating release :"+packageJson.version);
-				log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases');
+				
+			log("Find release :"+packageJson.version);	
+			request.get({
+			}	, function(err,httpResponse,body){
+				if(err){
+					log("Create Release Error");
+					log(err);
+				}
+			});
+	log("Creating release :"+packageJson.version);
+	log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases');			
 				
 request.post({
 	url:'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases'
@@ -159,7 +168,7 @@ request.post({
 	
 	const options = {
 							method: 'PUT',
-							url: 'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
+							url: 'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
 							qs: {name: filename}, // optional 
 							headers: {
 									'content-type': 'application/octet-stream',
