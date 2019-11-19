@@ -1,204 +1,101 @@
-const cp = require("child_process");
 const fs = require('fs');
-const request = require('request-promise');
+const cp = require("child_process");
 
+const github = require('@actions/github');
+const core = require('@actions/core');
 
-
-
-const NPM_LOCKFILE_PATH = "./package-lock.json";
+const ghRepo = process.env['GITHUB_REPOSITORY'].split('/');
 const PACKAGE_JSON_PATH = "./package.json";
+const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf8"));
+const runCmd = cmd => cp.execSync(cmd, { encoding: "utf8", stdio: "inherit" });
 
-/**
- * Logs to the console
- */
-const log = msg => console.log(`\n${msg}`); // eslint-disable-line no-console
 
-/**
- * Exits the current process with an error code and message
- */
-const exit = msg => {
-	console.error(msg);
-	process.exit(1);
-};
+async function run() {
+	// This should be a token with access to your repository scoped in as a secret.
+	// The YML workflow will need to set myToken with the GitHub Secret Token
+	// myToken: ${{ secrets.GITHUB_TOKEN }}
+	// https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
-/**
- * Executes the provided shell command and redirects stdout/stderr to the console
- */
-const run = cmd => cp.execSync(cmd, { encoding: "utf8", stdio: "inherit" });
-
-/**
- * Returns whether NPM should be used to run commands (instead of Yarn, which is the default)
- */
-const useNpm = fs.existsSync(NPM_LOCKFILE_PATH);
-
-/**
- * Exits if the `package.json` file is missing
- */
-const verifyPackageJson = () => {
-	if (!fs.existsSync(PACKAGE_JSON_PATH)) {
-		exit("Missing `package.json` file");
-	}
-};
-
-/**
- * Determines the current operating system (one of ["mac", "windows", "linux"])
- */
-const getPlatform = () => {
-	switch (process.platform) {
-		case "darwin":
-			return "mac";
-		case "win32":
-			return "windows";
-		default:
-			return "linux";
-	}
-};
-
-/**
- * Parses the environment variable with the provided name. If `required` is set to `true`, the
- * program exits if the variable isn't defined
- */
-const getEnvVariable = (name, required = false) => {
-	const value = process.env[`INPUT_${name.toUpperCase()}`];
-	if (required && (value === undefined || value === null || value === "")) {
-		exit(`"${name}" input variable is not defined`);
-	}
-	return value;
-};
-
-/**
- * Sets the specified env variable if the value isn't empty
- */
-const setEnvVariable = (name, value) => {
-	if (value !== null && value !== undefined && value !== "") {
-		process.env[name] = value.toString();
-	}
-};
-
-/**
- * Installs NPM dependencies and builds/releases the Electron app
- */
-const runAction = () => {
-	const platform = getPlatform();
-	const release = getEnvVariable("release") === "true";
-	const GITHUB_REPOSITORY = process.env['GITHUB_REPOSITORY'];
-	const ghtoken = getEnvVariable("github_token", true);
-
-	// Make sure `package.json` file exists
-	verifyPackageJson();
-
-	// Copy "github_token" input variable to "GH_TOKEN" env variable (required by `electron-builder`)
-	//setEnvVariable("GH_TOKEN", getEnvVariable("github_token", true));
-
-	// Require code signing certificate and password if building for macOS. Export them to environment
-	// variables (required by `electron-builder`)
-	if (platform === "mac") {
-		//setEnvVariable("CSC_LINK", getEnvVariable("mac_certs"));
-		//setEnvVariable("CSC_KEY_PASSWORD", getEnvVariable("mac_certs_password"));
-	} else if (platform === "windows") {
-		//setEnvVariable("CSC_LINK", getEnvVariable("windows_certs"));
-		//	setEnvVariable("CSC_KEY_PASSWORD", getEnvVariable("windows_certs_password"));
-	}
-
-	// Disable console advertisements during install phase
-	setEnvVariable("ADBLOCK", true);
-
-	log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
-	run("yarn");
+	console.log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
+	runCmd("yarn");
 
 	// Run NPM build script if it exists
-	log("Running the build script…");
+	console.log("Running the build script…");
 	const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, "utf8"));
-	run("yarn build");
+	runCmd("yarn build");
 
+	const myToken = core.getInput('github_token');
 
-	log(`${release ? "Releasing" : "Building"} the Electron app…`);
-	if(release){
-		fs.readdir(process.cwd()+'/dist', function(err, items) {
-			var filename=false;
+	const octokit = new github.GitHub(myToken);
 
-			for (var i=0; i<items.length; i++) {
-					if(platform=='mac' && items[i].match(/.dmg$/)){
-						filename = items[i];
-					}else if(platform=='windows' && items[i].match(/.exe/)){
-						filename = items[i];
-					}else if(platform=='linux' && items[i].match(/.AppImage/)){
-						filename = items[i];
-					}
-			}
-			
-			
-			if(filename){
-				log("Found File name:"+filename);
-				
-				//https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}
-				var stats = fs.statSync(process.cwd()+'/dist/'+filename);
-				var fileSizeInBytes = stats["size"];
-				
-			log("Find release :"+packageJson.version);	
-			request.get({
-			}	, function(err,httpResponse,body){
-				if(err){
-					log("Create Release Error");
-					log(err);
-				}
-			});
-	log("Creating release :"+packageJson.version);
-	log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases');			
-				
-request.post({
-	url:'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases'
-	, body: {
-		tag_name:packageJson.version,
-		target_commitish: 'electron',
-		name: 'v'+packageJson.version,
-		body: 'New Release'
-	}
-	, json: true
-	, headers: {'authorization': 'token '+ghtoken,'user-agent':"starfishmod-action-electron-header"	}
-	
-}, function(err,httpResponse,body){
-	if(err){
-		log("Create Release Error");
-		log(err);
-	}
-	
-	log("attempt Upload");
-	log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets');
-	
-	const options = {
-							method: 'PUT',
-							url: 'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
-							qs: {name: filename}, // optional 
-							headers: {
-									'content-type': 'application/octet-stream',
-									'authorization': 'token '+ghtoken,
-									'content-length':fileSizeInBytes
-								,'user-agent':"starfishmod-action-electron-header"
-							}
-					};
-
-					fs.createReadStream(process.cwd()+'/dist/'+filename).pipe(request(options)).then(body =>{
-						log("success Upload");
-							console.log(body);
-					})
-					.catch(err => {
-						log("failed Upload");
-							console.log(err);
-					});
-	
-
-});
-				
-				
-			}
+	console.log('look For Tag');
+	var relData = await octokit.repos.getReleaseByTag({
+		owner:ghRepo[0],
+		repo:ghRepo[1],
+		tag: packageJson.version
 	});
-		
-		
-		
 
-		
+	console.log('Tag release search results');
+	console.log(relData);
+
+	if(!relData){
+		console.log('No Tag so create one');
+		relData = await github.repos.createRelease({
+			owner:ghRepo[0],
+			repo:ghRepo[1],
+			tag_name: packageJson.version,
+			name:  packageJson.version,
+			body: packageJson.version,
+			target_commitish: core.getInput('branch'),
+			draft:false,
+			prerelease:false
+		});
+		console.log(relData);
 	}
-};
 
-runAction();
+	if(relData && relData.upload_url){
+		fs.readdir(process.cwd() + '/dist', function(err, items) {
+			var filename = false;
+
+			for (var i = 0; i < items.length; i++) {
+				if (process.platform == 'darwin' && items[i].match(/.dmg$/)) {
+					filename = items[i];
+				} else if (process.platform == 'win32' && items[i].match(/.exe/)) {
+					filename = items[i];
+				} else if (process.platform == 'linux' && items[i].match(/.AppImage/)) {
+					filename = items[i];
+				}
+			}
+
+			var stats = fs.statSync(process.cwd() + '/dist/' + filename);
+			var fileSizeInBytes = stats["size"];
+
+			var success = octokit.repos.uploadReleaseAsset({
+				file:fs.readFileSync(process.cwd() + '/dist/' + filename),
+				headers:{
+					'content-type': 'application/octet-stream',
+					'content-length':fileSizeInBytes
+				},
+				name:filename,
+				url:relData.upload_url
+			});
+
+		});
+
+	}
+
+
+}
+
+run();
+
+
+
+
+
+
+
+
+
+
+

@@ -12,10 +12,10 @@ inputs:
   mac_certs_password:
     description: Password for decrypting `mac_certs`
     required: false
-  release:
-    description: Whether the app should be released after a successful build
+  branch:
+    description: Branch on Github
     required: false
-    default: false
+    default: master
   windows_certs:
     description: Base64-encoded code signing certificate for Windows
     required: false
