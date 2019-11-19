@@ -16,7 +16,7 @@
 		"lint": "eslint --fix --max-warnings 0"
 	},
 	"dependencies": {
-		"request-promise":"*"
+		"request-promise": "*"
 	},
 	"peerDependencies": {},
 	"devDependencies": {
