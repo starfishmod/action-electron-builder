@@ -129,11 +129,14 @@ const runAction = () => {
 			
 			
 			if(filename){
+				log("Found File name:"+filename);
 				
 				//https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}
 				var stats = fs.statSync(process.cwd()+'/dist/'+filename);
 				var fileSizeInBytes = stats["size"];
-					
+				log("Creating release :"+packageJson.version);
+				log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases');
+				
 request.post({
 	url:'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases'
 	, body: {
@@ -147,11 +150,16 @@ request.post({
 	
 }, function(err,httpResponse,body){
 	if(err){
+		log("Create Release Error");
 		log(err);
 	}
+	
+	log("attempt Upload");
+	log('https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets');
+	
 	const options = {
 							method: 'PUT',
-							url: 'https://api.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
+							url: 'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
 							qs: {name: filename}, // optional 
 							headers: {
 									'content-type': 'application/octet-stream',
@@ -162,9 +170,11 @@ request.post({
 					};
 
 					fs.createReadStream(process.cwd()+'/dist/'+filename).pipe(request(options)).then(body =>{
+						log("success Upload");
 							console.log(body);
 					})
 					.catch(err => {
+						log("failed Upload");
 							console.log(err);
 					});
 	
