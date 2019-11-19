@@ -131,7 +131,8 @@ const runAction = () => {
 			if(filename){
 				
 				//https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets?name=${FILENAME}
-		
+				var stats = fs.statSync(process.cwd()+'/dist/'+filename);
+				var fileSizeInBytes = stats["size"];
 					
 
 					const options = {
@@ -140,7 +141,8 @@ const runAction = () => {
 							qs: {name: filename}, // optional 
 							headers: {
 									'content-type': 'application/octet-stream',
-									'authorization': 'token '+ghtoken
+									'authorization': 'token '+ghtoken,
+									'content-length':fileSizeInBytes
 							}
 					};
 
