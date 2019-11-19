@@ -135,13 +135,14 @@ const runAction = () => {
 				var fileSizeInBytes = stats["size"];
 					
 request.post({
-	url:'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases'
-	, form: {
+	url:'https://api.github.com/v3/repos/'+GITHUB_REPOSITORY+'/releases'
+	, body: {
 		tag_name:packageJson.version,
 		target_commitish: 'electron',
 		name: 'v'+packageJson.version,
 		body: 'New Release'
 	}
+	, json: true
 	, headers: {'authorization': 'token '+ghtoken	}
 	
 }, function(err,httpResponse,body){
@@ -150,7 +151,7 @@ request.post({
 	}
 	const options = {
 							method: 'PUT',
-							url: 'https://uploads.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
+							url: 'https://api.github.com/repos/'+GITHUB_REPOSITORY+'/releases/'+packageJson.version+'/assets',
 							qs: {name: filename}, // optional 
 							headers: {
 									'content-type': 'application/octet-stream',
