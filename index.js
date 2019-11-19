@@ -16,7 +16,7 @@ async function run() {
 	// myToken: ${{ secrets.GITHUB_TOKEN }}
 	// https://help.github.com/en/articles/virtual-environments-for-github-actions#github_token-secret
 
-	console.log(`Installing dependencies using ${useNpm ? "NPM" : "Yarn"}…`);
+	console.log('Installing dependencies using Yarn');
 	runCmd("yarn");
 
 	// Run NPM build script if it exists
